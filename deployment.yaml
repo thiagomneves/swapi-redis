@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: infra
+spec:
+  selector:
+    matchLabels:
+      app: redis
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+        - image: redis:latest
+          name: redis
+          envFrom:
+            - configMapRef:
+                name: redis-configmap
+          ports:
+            - containerPort: 3306
+              name: redis
+          volumeMounts:
+            - name: redis-persistent-storage
+              mountPath: /var/lib/redis
+      volumes:
+        - name: redis-persistent-storage
+          persistentVolumeClaim:
+            claimName: redis-pv-claim
